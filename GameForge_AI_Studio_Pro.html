@@ -48,6 +48,25 @@
 </style>
 </head>
 <body>
+<!-- API base helper: when packaged as Android app, set window.API_BASE = 'https://your-server' via config or native code -->
+<script>
+// Intercept fetch calls to absolute prefix '/api/...' and prepend window.API_BASE when set.
+(function(){
+  try{
+    const orig = window.fetch.bind(window);
+    window.fetch = function(input, init){
+      try{
+        if(typeof input === 'string' && input.startsWith('/api/')){
+          const base = (window.API_BASE || '');
+          input = base + input;
+        }
+      }catch(e){}
+      return orig(input, init);
+    };
+    // Allow native apps to set API_BASE via meta tag or window.API_BASE before this script runs.
+  }catch(e){console.warn('fetch override failed', e)}
+})();
+</script>
 <div class="app">
   <aside class="side">
     <header class="head">
@@ -223,7 +242,7 @@ let history=[],historyIndex=-1;
 let aiAbortController=null;
 
 function toast(msg, t=2400){ toastEl.textContent=msg; toastEl.classList.add('show'); clearTimeout(toastEl._timer); toastEl._timer=setTimeout(()=>toastEl.classList.remove('show'),t) }
-function safeName(s){return (s||'game').replace(/[^\w\u0600-\u06FF-]+/g,'_') }
+function safeName(s){return (s||'game').replace(/[^\w\u0600-\u06FF-]+/g,'_')}
 
 function init3D(){
   scene=new THREE.Scene();scene.background=new THREE.Color('#080b14');scene.fog=new THREE.Fog('#080b14',18,46);
@@ -285,23 +304,23 @@ async function checkAIConnection(){
 function cleanGeneratedHTML(s){ let t=String(s||'').trim(); t=t.replace(/^```(?:html)?\s*/i,'').replace(/\s*```$/,''); const idx=t.search(/<!doctype\s+html|<html\b/i); if(idx>=0) t=t.slice(idx); const end=t.toLowerCase().lastIndexOf('</html>'); if(end>-1) t=t.slice(0,end+7); return t }
 
 async function generateAIGame(){
-  const idea=$('#aiIdea').value.trim(); if(idea.length<8){ setAIStatus('اكتب وصفًا أطول للعبة','bad'); return }
+  const idea=$('#aiIdea').value.trim(); if(idea.length<8){ setAIStatus(aiStatusEl,'اكتب وصفًا أطول للعبة','bad'); return }
   const provider=$('#providerSelect').value; const localUrl=$('#localUrl').value.trim(); const unlimited = $('#unlimitedMode').value==='on';
-  $('#aiGenerate').disabled=true; $('#aiAbort').disabled=false; setAIStatus('جارٍ التوليد…','busy'); aiAbortController = new AbortController();
+  $('#aiGenerate').disabled=true; $('#aiAbort').disabled=false; setAIStatus(aiStatusEl,'جارٍ التوليد…','busy'); aiAbortController = new AbortController();
   try{
-    if(provider==='local'){ if(!localUrl) throw new Error('عنوان LLM المحلي فارغ'); const r = await fetch(localUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ prompt: idea, type: $('#aiGameType').value, style: $('#aiStyle').value, unlimited }),signal: aiAbortController.signal}); if(!r.ok) throw new Error('خطأ من LLM المحلي: '+r.status); const data = await r.json(); const html = cleanGeneratedHTML(data.html || data.output || ''); if(!html) throw new Error('الـ LLM المحلي لم يرجع HTML صالح'); $('#aiCode').value = html; $('#aiCode').style.display='block'; localStorage.setItem('gameforge-ai-last-game', html); setAIStatus('تم التوليد محلياً ✓','ok'); showPreview(); return; }
+    if(provider==='local'){ if(!localUrl) throw new Error('عنوان LLM المحلي فارغ'); const r = await fetch(localUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ prompt: idea, type: $('#aiGameType').value, style: $('#aiStyle').value, unlimited }),signal: aiAbortController.signal}); if(!r.ok) throw new Error('خطأ من LLM المحلي: '+r.status); const data = await r.json(); const html = cleanGeneratedHTML(data.html || data.output || ''); if(!html) throw new Error('الـ LLM المحلي لم يرجع HTML صالح'); $('#aiCode').value = html; $('#aiCode').style.display='block'; localStorage.setItem('gameforge-ai-last-game', html); setAIStatus(aiStatusEl,'تم التوليد محلياً ✓','ok'); showPreview(); return; }
     const res = await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','x-gameforge-code': $('#aiAccessCode').value||''},body:JSON.stringify({ idea, gameType: $('#aiGameType').value, style: $('#aiStyle').value, unlimited }),signal: aiAbortController.signal}); if(!res.ok){ const err = await res.json().catch(()=>({error:'خادم أعاد خطأ'})); throw new Error(err.error||JSON.stringify(err)); }
     const reader = res.body.getReader(); const dec = new TextDecoder(); let buf=''; $('#aiCode').value=''; $('#aiCode').style.display='block';
-    while(true){ const { done, value } = await reader.read(); if(done) break; buf += dec.decode(value,{stream:true}); let lines=buf.split(/\r?\n/); buf=lines.pop()||''; for(const line of lines){ if(!line.startsWith('data:')) continue; const payload=line.replace(/^data:\s*/,'').trim(); if(!payload||payload==='[DONE]') continue; try{ const obj=JSON.parse(payload); const delta = obj.content || obj.delta || ''; if(delta){ $('#aiCode').value += delta; setAIStatus('جارٍ التوليد… ('+$('#aiCode').value.length+' حرف)','busy') } }catch(e){} } }
-    const cleaned = cleanGeneratedHTML($('#aiCode').value); $('#aiCode').value = cleaned; localStorage.setItem('gameforge-ai-last-game', cleaned); setAIStatus('تم التوليد ✓','ok'); showPreview();
-  }catch(e){ if(e.name==='AbortError') setAIStatus('تم إلغاء التوليد','bad'); else setAIStatus('فشل التوليد: '+(e.message||e),'bad'); }
+    while(true){ const { done, value } = await reader.read(); if(done) break; buf += dec.decode(value,{stream:true}); let lines=buf.split(/\r?\n/); buf=lines.pop()||''; for(const line of lines){ if(!line.startsWith('data:')) continue; const payload=line.replace(/^data:\s*/,'').trim(); if(!payload||payload==='[DONE]') continue; try{ const obj=JSON.parse(payload); const delta = obj.content || obj.delta || ''; if(delta){ $('#aiCode').value += delta; setAIStatus(aiStatusEl,'جارٍ التوليد… ('+$('#aiCode').value.length+' حرف)','busy') } }catch(e){} } }
+    const cleaned = cleanGeneratedHTML($('#aiCode').value); $('#aiCode').value = cleaned; localStorage.setItem('gameforge-ai-last-game', cleaned); setAIStatus(aiStatusEl,'تم التوليد ✓','ok'); showPreview();
+  }catch(e){ if(e.name==='AbortError') setAIStatus(aiStatusEl,'تم إلغاء التوليد','bad'); else setAIStatus(aiStatusEl,'فشل التوليد: '+(e.message||e),'bad'); }
   finally{ $('#aiGenerate').disabled=false; $('#aiAbort').disabled=true; aiAbortController=null; }
 }
 
 $('#aiAbort').addEventListener('click', ()=>{ if(aiAbortController) aiAbortController.abort(); });
-function showPreview(){ const html=$('#aiCode').value.trim(); if(!html) return setAIStatus('لا يوجد كود لعرضه','bad'); $('#aiGameFrame').srcdoc=html; document.getElementById('aiGameOverlay').classList.add('open'); document.getElementById('aiGameOverlay').setAttribute('aria-hidden','false'); }
+function showPreview(){ const html=$('#aiCode').value.trim(); if(!html) return setAIStatus(aiStatusEl,'لا يوجد كود لعرضه','bad'); $('#aiGameFrame').srcdoc=html; document.getElementById('aiGameOverlay').classList.add('open'); document.getElementById('aiGameOverlay').setAttribute('aria-hidden','false'); }
 $('#aiExitPreview').addEventListener('click', ()=>{ document.getElementById('aiGameOverlay').classList.remove('open'); document.getElementById('aiGameOverlay').setAttribute('aria-hidden','true'); $('#aiGameFrame').srcdoc=''; });
-$('#aiDownload').addEventListener('click', ()=>{ const html=$('#aiCode').value.trim(); if(!html) return setAIStatus('لا يوجد كود للتحميل','bad'); downloadFile(safeName($('#projectName').value||'game')+'-AI.html', html, 'text/html;charset=utf-8'); });
+$('#aiDownload').addEventListener('click', ()=>{ const html=$('#aiCode').value.trim(); if(!html) return setAIStatus(aiStatusEl,'لا يوجد كود للتحميل','bad'); downloadFile(safeName($('#projectName').value||'game')+'-AI.html', html, 'text/html;charset=utf-8'); });
 $('#aiToggleCode').addEventListener('click', ()=>{ $('#aiCode').style.display = $('#aiCode').style.display === 'block' ? 'none' : 'block'; });
 $('#aiCheck').addEventListener('click', checkAIConnection); $('#aiGenerate').addEventListener('click', generateAIGame);
 
@@ -332,4 +351,3 @@ init3D(); makeObject('box', new THREE.Vector3(0,0.6,0)); makeObject('sphere', ne
 </script>
 </body>
 </html>
-
