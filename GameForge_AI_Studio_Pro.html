@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#070b16">
+<title>GameForge AI Studio Pro — Ultimate</title>
+<style>
+:root{--bg:#070b16;--panel:#0f1a2b;--panel2:#142438;--line:#24354f;--cyan:#4ee9ff;--violet:#8d6bff;--txt:#e9f3ff;--muted:#93a8ca;--green:#4fe6a8;--red:#ff5c7d;--gold:#ffc766}
+*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,Segoe UI,Helvetica,Arial}button,input,select,textarea{font:inherit}button{cursor:pointer}.app{display:grid;grid-template-columns:minmax(300px,380px) 1fr;height:100dvh}
+.side{background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.head{display:flex;gap:12px;align-items:center;padding:12px;border-bottom:1px solid var(--line)}
+.logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--cyan),var(--violet));display:grid;place-items:center;font-weight:900;color:#041217}
+.head h1{margin:0;font-size:15px;background:linear-gradient(90deg,var(--cyan),#c6b4ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.head small{display:block;font-size:10px;color:var(--muted)}
+.tabs{display:flex;gap:6px;padding:8px;overflow-x:auto;border-bottom:1px solid var(--line)}
+.tab{padding:8px 10px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--muted);white-space:nowrap}
+.tab.active{background:var(--panel2);color:var(--cyan);border-color:var(--line)}
+.panel{display:none;overflow:auto;flex:1;padding:12px;min-height:0}.panel.active{display:block}
+.group{border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:12px}.group h3{margin:0 0 10px;color:var(--cyan);font-size:12px}
+.field{display:grid;grid-template-columns:1fr 1.2fr auto;gap:8px;align-items:center;margin:8px 0;font-size:13px}
+.field input[type=range]{width:100%;accent-color:var(--cyan)}.field input[type=color]{width:44px;height:28px;border-radius:8px;border:1px solid var(--line);background:var(--panel2)}
+.field input[type=text],.field select,textarea{background:var(--panel2);border:1px solid var(--line);color:var(--txt);padding:8px;border-radius:8px;width:100%}
+.btn{padding:9px 12px;border-radius:9px;border:0;background:linear-gradient(120deg,var(--cyan),#9b89ff);color:#06111d;font-weight:800}
+.btn.secondary{background:var(--panel2);border:1px solid var(--line);color:var(--txt)}
+.btn.danger{background:#4b2430;color:#ffdfe6;border:1px solid #753645}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.btnrow .btn{flex:1}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.card{background:var(--panel2);border:1px solid var(--line);padding:12px;border-radius:10px;text-align:right}
+.hint{color:var(--muted);font-size:12px;line-height:1.6}
+.stage{position:relative;background:radial-gradient(ellipse at center,#0e1730,#070b16 72%);min-width:0;min-height:0}
+#view{width:100%;height:100%;display:block;touch-action:none}
+.topbar{position:absolute;top:12px;left:12px;right:12px;display:flex;gap:8px;align-items:center;pointer-events:none}.topbar>*{pointer-events:auto}
+.pill{padding:7px 12px;border-radius:18px;border:1px solid var(--line);background:rgba(8,12,20,.6);color:var(--cyan)}
+.tools{position:absolute;left:12px;top:64px;display:grid;gap:6px}.toolbtn{width:40px;height:40px;border-radius:10px;background:rgba(12,18,30,.9);border:1px solid var(--line);color:var(--txt)}
+.touchpad{display:none;position:absolute;right:14px;bottom:62px;gap:10px;align-items:flex-end;z-index:5}
+.bottomhint{position:absolute;bottom:12px;left:12px;right:12px;display:flex;justify-content:space-between;gap:8px}
+.empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;pointer-events:none}
+#toast{position:absolute;left:50%;transform:translateX(-50%);bottom:58px;padding:10px 14px;border-radius:10px;background:#0d1726;border:1px solid var(--cyan);opacity:0;transition:.18s;pointer-events:none}
+#toast.show{opacity:1}
+.ai-status{padding:10px;border-radius:9px;border:1px solid var(--line);background:#0b1220;color:var(--muted);font-size:13px}
+.ai-status.ok{color:#7ef3b9;border-color:#2a6b4f}
+.ai-status.busy{color:#d7c8ff;border-color:#5f4bb4}
+.ai-status.bad{color:#ffb1c0;border-color:#733349}
+#aiCode{display:none;direction:ltr;text-align:left;min-height:200px;white-space:pre;resize:vertical}
+@media(max-width:900px){.app{grid-template-columns:1fr;grid-template-rows:minmax(260px,44dvh) 1fr}.side{grid-row:2;border-left:0;border-top:1px solid var(--line)}.touchpad{display:flex}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <header class="head">
+      <div class="logo">⚡</div>
+      <div><h1>GameForge AI Studio Pro</h1><small>Pro · Multi-Engine · Templates</small></div>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="scene">المشهد</button>
+      <button class="tab" data-tab="character">الشخصية</button>
+      <button class="tab" data-tab="game">اللعبة</button>
+      <button class="tab" data-tab="project">المشروع</button>
+      <button class="tab" data-tab="ai">AI</button>
+    </nav>
+
+    <section id="panel-scene" class="panel active">
+      <div class="group"><h3>➕ عناصر</h3>
+        <div class="cards">
+          <button class="card" data-add="box"><b>🧊 مكعب</b><span class="hint">أساس سريع</span></button>
+          <button class="card" data-add="sphere"><b>🔮 كرة</b><span class="hint">جسم ناعم</span></button>
+          <button class="card" data-add="cylinder"><b>🛢 أسطوانة</b><span class="hint">ركيزة</span></button>
+          <button class="card" data-add="torus"><b>⭕ حلقة</b><span class="hint">تفاصيل</span></button>
+        </div>
+      </div>
+      <div class="group">
+        <h3>🎨 المجسم المحدد</h3>
+        <div class="field"><label>الاسم</label><input id="objName" type="text"><span></span></div>
+        <div class="field"><label>اللون</label><input id="objColor" type="color" value="#00e0ff"><span></span></div>
+        <div class="field"><label>الحجم</label><input id="objScale" type="range" min=".2" max="3" step=".1" value="1"><span class="value" id="objScaleV">1.0</span></div>
+        <div class="btnrow"><button class="btn secondary" id="duplicate">نسخ</button><button class="btn danger" id="deleteObj">حذف</button></div>
+      </div>
+      <div class="group">
+        <h3>🖥 العرض</h3>
+        <div class="field"><label>دوران تلقائي</label><input id="autoRotate" type="checkbox" checked><span></span></div>
+        <div class="field"><label>شبكة</label><input id="gridToggle" type="checkbox" checked><span></span></div>
+        <div class="btnrow"><button class="btn secondary" id="resetCamera">إعادة الكاميرا</button><button class="btn" id="addCharacter">إنشاء شخصية</button></div>
+      </div>
+    </section>
+
+    <section id="panel-character" class="panel">
+      <div class="group">
+        <h3>🧍 الشخصية</h3>
+        <div class="field"><label>لون الجلد</label><input id="skin" type="color" value="#d4c5b0"><span></span></div>
+        <div class="field"><label>طول</label><input id="height" type="range" min=".8" max="1.3" step=".05" value="1"><span class="value" id="heightV">1.00</span></div>
+        <div class="btnrow"><button class="btn" id="applyCharacter">تحديث</button><button class="btn secondary" id="newCharacter">شخصية جديدة</button></div>
+      </div>
+    </section>
+
+    <section id="panel-game" class="panel">
+      <div class="group">
+        <h3>🎮 وضع اللعب</h3>
+        <div class="btnrow"><button class="btn" id="buildGame">إنشاء ساحة</button><button class="btn" id="playGame">▶ تشغيل</button><button class="btn secondary" id="stopGame">إيقاف</button></div>
+        <div class="field"><label>سرعة</label><input id="speed" type="range" min="1" max="8" step=".5" value="4"><span class="value" id="speedV">4.0</span></div>
+        <div class="hint">وضع اختبار سريع للعبة داخل الاستوديو.</div>
+      </div>
+    </section>
+
+    <section id="panel-project" class="panel">
+      <div class="group">
+        <h3>💾 حفظ</h3>
+        <div class="field"><label>اسم المشروع</label><input id="projectName" type="text" value="My GameForge Project"><span></span></div>
+        <div class="btnrow"><button class="btn" id="saveLocal">حفظ</button><button class="btn secondary" id="loadLocal">تحميل</button></div>
+        <div class="btnrow"><button class="btn secondary" id="exportJson">تصدير JSON</button><button class="btn secondary" id="importJson">استيراد JSON</button></div>
+      </div>
+
+      <div class="group">
+        <h3>📦 قوالب</h3>
+        <div class="btnrow">
+          <button class="btn secondary template" data-template="platformer">Platformer 2D</button>
+          <button class="btn secondary template" data-template="runner">Runner 2D</button>
+          <button class="btn secondary template" data-template="shooter">Top-down Shooter</button>
+          <button class="btn secondary template" data-template="racer">Racing (2D)</button>
+          <button class="btn secondary template" data-template="puzzle">Puzzle</button>
+        </div>
+        <div class="btnrow" style="margin-top:8px">
+          <button class="btn secondary template" data-template="survival">Survival</button>
+          <button class="btn secondary template" data-template="arena3d">3D Arena</button>
+          <button class="btn secondary template" data-template="rhythm">Rhythm</button>
+          <button class="btn secondary template" data-template="td">Tower Defense</button>
+          <button class="btn secondary template" data-template="topdown">Top-down</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-ai" class="panel">
+      <div class="group">
+        <h3>🤖 مولّد الألعاب بالذكاء الاصطناعي</h3>
+        <div class="field"><label>مزوّد AI</label>
+          <select id="providerSelect">
+            <option value="openai">OpenAI (سحابي)</option>
+            <option value="local">Local LLM (محلي)</option>
+          </select><span></span></div>
+
+        <div class="field"><label>عنوان LLM محلي</label><input id="localUrl" type="text" placeholder="http://localhost:8080/generate"><span></span></div>
+
+        <div class="field"><label>رمز الوصول للخادم</label><input id="aiAccessCode" type="password" placeholder="APP_ACCESS_CODE (إن وُجد)"><span></span></div>
+
+        <div class="field"><label>وضع غير محدود (تحذير)</label>
+          <select id="unlimitedMode"><option value="off">مطفأ (موصى)</option><option value="on">تشغيل (احذر التكلفة)</option></select><span></span></div>
+
+        <div class="hint">وضع غير محدود يعني تعطيل قيود الخادم — لكن التكلفة ستظل على حساب API أو عتادك المحلي.</div>
+      </div>
+
+      <div class="group">
+        <label class="ailabel" for="aiIdea" style="display:block;margin-bottom:6px;color:var(--muted)">وصف اللعبة (مثال: "سباق سيارات ثنائي الأبعاد، مضمار قصير، نقاط، زر إعادة")</label>
+        <textarea id="aiIdea" rows="5"></textarea>
+        <div class="field"><label>نوع</label><select id="aiGameType"><option>2D</option><option selected>3D</option><option>platformer</option><option>racing</option><option>puzzle</option><option>survival</option></select><span></span></div>
+        <div class="field"><label>الأسلوب</label><select id="aiStyle"><option>stylized low-poly</option><option selected>cinematic neon</option><option>pixel art</option><option>bright cartoon</option><option>realistic dark</option></select><span></span></div>
+
+        <div class="btnrow" style="margin-top:10px">
+          <button class="btn" id="aiGenerate">✨ أنشئ لعبة</button>
+          <button class="btn secondary" id="aiCheck">🔎 فحص الخادم</button>
+          <button class="btn secondary" id="aiAbort" disabled>إلغاء</button>
+        </div>
+
+        <div style="margin-top:10px">
+          <div class="ai-status" id="aiStatus">الجاهزية: لم يتم الفحص</div>
+        </div>
+      </div>
+
+      <div class="group">
+        <h3>🎮 معاينة / كود</h3>
+        <div class="btnrow"><button class="btn" id="aiPreview">▶ معاينة</button><button class="btn secondary" id="aiDownload">⬇ تنزيل</button><button class="btn secondary" id="aiToggleCode">عرض الكود</button></div>
+        <textarea id="aiCode" spellcheck="false" aria-label="كود اللعبة الناتج"></textarea>
+      </div>
+    </section>
+
+  </aside>
+
+  <main class="stage">
+    <canvas id="view"></canvas>
+    <div class="topbar">
+      <span class="pill" id="modePill">● وضع التحرير</span>
+      <div style="flex:1"></div>
+      <button class="btn secondary" id="undoBtn">↶ تراجع</button>
+      <button class="btn secondary" id="redoBtn">↷ إعادة</button>
+      <button class="btn secondary" id="quickSave">💾 حفظ</button>
+      <button class="btn secondary" id="quickAdd">＋</button>
+    </div>
+
+    <div class="tools"><button class="toolbtn" id="camHome">⌂</button><button class="toolbtn" id="toggleGrid">▦</button><button class="toolbtn" id="toggleRotate">⟳</button></div>
+
+    <div class="empty" id="welcome"><div><h2>GameForge Pro</h2><p>ابدأ بقالب أو وصف لعبة ثم اضغط "أنشئ لعبة".</p></div></div>
+
+    <div class="touchpad" id="touchpad" aria-hidden="true">
+      <div class="cluster"><button class="up" data-key="w">▲</button><button class="left" data-key="a">◀</button><button class="down" data-key="s">▼</button><button class="right" data-key="d">▶</button></div>
+      <button class="jump" data-key=" ">قفز</button>
+    </div>
+
+    <div class="bottomhint"><span id="sceneCount">0 عناصر</span><span>Three.js · AI Studio Pro</span></div>
+    <div id="toast" role="status" aria-live="polite"></div>
+  </main>
+</div>
+
+<div id="aiGameOverlay" class="ai-overlay" aria-hidden="true">
+  <div class="ai-overlay-head"><strong>معاينة اللعبة</strong><div style="flex:1"></div><button class="btn secondary" id="aiExitPreview">إغلاق</button></div>
+  <iframe id="aiGameFrame" title="معاينة لعبة" sandbox="allow-scripts allow-forms allow-pointer-lock allow-modals"></iframe>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/GLTFExporter.js"></script>
+
+<script>
+(() => {
+'use strict';
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const canvas=$('#view'), toastEl=$('#toast');
+
+let scene,camera,renderer,controls,grid,objects=[],character=null,selected=null,gameOn=false,gameBuilt=false,charAnimOn=false,charAnimTime=0;
+const keys=new Set();
+let history=[],historyIndex=-1;
+let aiAbortController=null;
+
+function toast(msg, t=2400){ toastEl.textContent=msg; toastEl.classList.add('show'); clearTimeout(toastEl._timer); toastEl._timer=setTimeout(()=>toastEl.classList.remove('show'),t) }
+function safeName(s){return (s||'game').replace(/[^\w\u0600-\u06FF-]+/g,'_') }
+
+function init3D(){
+  scene=new THREE.Scene();scene.background=new THREE.Color('#080b14');scene.fog=new THREE.Fog('#080b14',18,46);
+  camera=new THREE.PerspectiveCamera(50,1,0.1,200);camera.position.set(6,5,8);
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,preserveDrawingBuffer:true});renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.75));renderer.shadowMap.enabled=true;renderer.outputEncoding=THREE.sRGBEncoding;
+  scene.add(new THREE.HemisphereLight(0xbfdcff,0x101827,1.45));
+  const dir=new THREE.DirectionalLight(0xffffff,2.0);dir.position.set(6,10,6);dir.castShadow=true;scene.add(dir);
+  const fill=new THREE.PointLight(0x00d7ff,1.2,28);fill.position.set(-6,4,-5);scene.add(fill);
+  grid=new THREE.GridHelper(30,30,0x3d5d8a,0x1b2a3d);scene.add(grid);
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(100,100),new THREE.MeshStandardMaterial({color:0x0b0f18,roughness:1}));floor.rotation.x=-Math.PI/2;floor.position.y=-.025;floor.receiveShadow=true;scene.add(floor);
+  controls = new THREE.OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.12;controls.enablePan=false;controls.minDistance=3;controls.maxDistance=30;controls.maxPolarAngle=Math.PI/2.05;controls.target.set(0,1,0);
+  resize(); window.addEventListener('resize', resize);
+  animate();
+}
+
+function resize(){ if(!renderer) return; const r=canvas.getBoundingClientRect(); renderer.setSize(Math.max(1,r.width),Math.max(1,r.height),false); camera.aspect=Math.max(1,r.width)/Math.max(1,r.height); camera.updateProjectionMatrix() }
+
+function geometry(type){ switch(type){ case'sphere':return new THREE.SphereGeometry(.65,32,24); case'cylinder':return new THREE.CylinderGeometry(.48,.48,1.2,24); case'torus':return new THREE.TorusGeometry(.58,.18,18,42); default:return new THREE.BoxGeometry(1,1,1)} }
+function material(color){ return new THREE.MeshStandardMaterial({color,roughness:.55,metalness:.12}) }
+
+function makeObject(type='box',pos=null){
+  const m=new THREE.Mesh(geometry(type),material($('#objColor').value||'#00e0ff'));
+  m.name=type[0].toUpperCase()+type.slice(1)+'_'+(objects.length+1); m.userData={kind:type}; m.position.copy(pos||new THREE.Vector3((Math.random()-.5)*2,0.7,(Math.random()-.5)*2)); m.castShadow=true; m.receiveShadow=true; scene.add(m); objects.push(m); selectObject(m); pushSnapshot(); $('#welcome').style.display='none'; refreshList(); return m;
+}
+
+function selectObject(o){ selected=o; if(!o) return; $('#objName').value=o.name; if(o.material?.color) $('#objColor').value='#'+o.material.color.getHexString(); $('#objScale').value=o.scale.x; $('#objScaleV').textContent=(o.scale.x).toFixed(1); refreshList() }
+function disposeObject(o){ scene.remove(o); o.traverse?.(n=>{ if(n.geometry) n.geometry.dispose(); if(n.material){ if(Array.isArray(n.material)) n.material.forEach(x=>x.dispose()); else n.material.dispose() } }) }
+
+function refreshList(){ $('#sceneCount').textContent=objects.length+' عناصر'; const list=$('#objectList'); if(!list) return; list.innerHTML=''; objects.forEach(o=>{ const row=document.createElement('div'); row.className='listitem'; const dot=document.createElement('span'); dot.textContent='◈'; dot.style.color='#4ee9ff'; const name=document.createElement('span'); name.className='name'; name.textContent=o.name; const pick=document.createElement('button'); pick.className='btn secondary'; pick.textContent='تحديد'; pick.onclick=()=>selectObject(o); const del=document.createElement('button'); del.className='btn danger'; del.textContent='×'; del.onclick=()=>removeObject(o); row.append(dot,name,pick,del); list.append(row) }) }
+
+function pushSnapshot(){ try{ const snap=projectData(); if(history[historyIndex] && JSON.stringify(history[historyIndex])===JSON.stringify(snap)) return; if(historyIndex<history.length-1) history.splice(historyIndex+1); history.push(JSON.parse(JSON.stringify(snap))); if(history.length>120) history.shift(); historyIndex=history.length-1; updateUndoButtons(); }catch(e){} }
+function restoreFromSnapshot(snap){ try{ objects.slice().forEach(o=>disposeObject(o)); objects=[]; character=null; selected=null; (snap.objects||[]).forEach(d=>{ let o;if(d.kind==='character'){ o=new THREE.Group(); (d.children||[]).forEach(c=>{ const g = (c.geometry==='SphereGeometry')? new THREE.SphereGeometry(.3,16,12) : new THREE.BoxGeometry(.3,.5,.3); const m=material(c.color||'#fff'); const mesh=new THREE.Mesh(g,m); mesh.position.fromArray(c.position||[0,0,0]); mesh.scale.fromArray(c.scale||[1,1,1]); o.add(mesh) }); }else{o=new THREE.Mesh(geometry(d.kind||'box'),material(d.color||'#00e0ff')); o.userData={kind:d.kind||'box'}} o.name=d.name||'Obj'; o.position.fromArray(d.position||[0,.5,0]); o.rotation.fromArray(d.rotation||[0,0,0]); o.scale.fromArray(d.scale||[1,1,1]); scene.add(o); objects.push(o); }); $('#projectName').value=snap.name||'Project'; $('#autoRotate').checked=snap.settings?.autoRotate!==false; $('#gridToggle').checked=snap.settings?.grid!==false; grid.visible=$('#gridToggle').checked; selected=objects.at(-1)||null; refreshList(); }catch(e){ toast('فشل استعادة المشروع: '+e.message) } }
+function undo(){ if(historyIndex<=0) return toast('لا يوجد تراجع'); historyIndex--; restoreFromSnapshot(history[historyIndex]); updateUndoButtons(); toast('تراجع') }
+function redo(){ if(historyIndex>=history.length-1) return toast('لا يوجد إعادة'); historyIndex++; restoreFromSnapshot(history[historyIndex]); updateUndoButtons(); toast('إعادة') }
+function updateUndoButtons(){ $('#undoBtn').disabled = historyIndex<=0; $('#redoBtn').disabled = historyIndex>=history.length-1 }
+
+function removeObject(o){ if(!o) return; if(!confirm('حذف العنصر؟')) return; objects=objects.filter(x=>x!==o); disposeObject(o); if(selected===o) selected=objects.at(-1)||null; refreshList(); pushSnapshot(); toast('تم الحذف') }
+function clearScene(){ if(!confirm('مسح كل العناصر؟')) return; objects.slice().forEach(o=>disposeObject(o)); objects=[]; selected=null; character=null; pushSnapshot(); refreshList(); $('#welcome').style.display='grid'; toast('تم مسح المشهد') }
+function createCharacter(){ const g=new THREE.Group(); g.name='Character_'+(objects.length+1); g.userData={kind:'character'}; const sk=material($('#skin').value), sh=material('#00aeca'), ha=material('#302044'); const s=new THREE.SphereGeometry(.34,24,18); const head=new THREE.Mesh(s,sk); head.position.set(0,1.75,0); g.add(head); scene.add(g); objects.push(g); character=g; selectObject(g); pushSnapshot(); refreshList(); toast('شخصية أنشئت'); return g }
+function duplicate(){ if(!selected) return toast('اختر عنصر'); const clone=selected.clone(true); clone.name=selected.name+'_copy'; clone.position.x+=.8; clone.traverse(n=>{ if(n.isMesh){ n.geometry=n.geometry.clone(); if(n.material){ if(Array.isArray(n.material)) n.material = n.material.map(m=>m.clone()); else n.material = n.material.clone(); } } }); scene.add(clone); objects.push(clone); selectObject(clone); pushSnapshot(); refreshList(); toast('تم النسخ') }
+function buildGame(){ objects.slice().forEach(o=>{ if(o!==character) disposeObject(o) }); objects=[]; for(let i=0;i<12;i++){ const p=new THREE.Mesh(new THREE.BoxGeometry(1,.4,1),material(i%2?0x283a59:0x382a7b)); p.position.set((i%4-1.5)*2,.2,(Math.floor(i/4)-1)*2.5); p.name='Platform_'+(i+1); p.userData={kind:'platform'}; scene.add(p); objects.push(p) } if(!character) createCharacter(); character.position.set(0,0,0); pushSnapshot(); refreshList(); toast('ساحة اللعب جاهزة') }
+function setGame(on){ if(on && !gameBuilt) buildGame(); gameOn=on; $('#touchpad').style.display=on?'flex':''; $('#modePill').textContent=on?'● وضع اللعب':'● وضع التحرير'; toast(on?'تشغيل اللعب':'إيقاف اللعب') }
+
+function projectData(){ return { format:'GameForgeProject',version:2,name:$('#projectName').value,createdAt:new Date().toISOString(),settings:{autoRotate:$('#autoRotate').checked,grid:$('#gridToggle').checked},objects:objects.map(o=>({name:o.name,kind:o.userData?.kind||'box',position:o.position.toArray(),rotation:o.rotation.toArray(),scale:o.scale.toArray(),color:o.material?.color?.getHexString?('#'+o.material.color.getHexString()):undefined,children:o.userData?.kind==='character'?o.children.map(c=>({geometry:c.geometry?.type||'Mesh',position:c.position.toArray(),scale:c.scale.toArray(),color:c.material?.color?.getHexString?('#'+c.material.color.getHexString()):undefined})):undefined})) } }
+function saveLocal(){ try{ localStorage.setItem('gameforge-pro-project',JSON.stringify(projectData())); toast('حفظ محليًا'); }catch(e){ toast('فشل الحفظ') } }
+function loadLocal(){ try{ const s=localStorage.getItem('gameforge-pro-project'); if(!s) return toast('لا يوجد حفظ'); restoreFromSnapshot(JSON.parse(s)); toast('تم التحميل'); }catch(e){ toast('خطأ تحميل') } }
+function downloadFile(name,content,type){ const blob=new Blob([content],{type}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1500) }
+
+function setAIStatus(msg,kind){ const el=$('#aiStatus'); el.textContent=msg; el.className='ai-status'+(kind?(' '+kind):'') }
+
+async function checkAIConnection(){
+  const provider=$('#providerSelect').value; const localUrl=$('#localUrl').value.trim();
+  try{
+    if(provider==='local'){ if(!localUrl) return setAIStatus('أدخل عنوان LLM المحلي لإجراء الفحص','bad'); const r=await fetch(localUrl, {method:'OPTIONS'}).catch(()=>null); if(r && r.ok) setAIStatus('LLM محلي جاهز','ok'); else setAIStatus('تعذر الوصول لـ LLM المحلي','bad'); return; }
+    const res=await fetch('/api/status',{cache:'no-store'}).catch(()=>null); if(!res){ setAIStatus('لم أستطع الوصول إلى خادم API المحلي (server.mjs) — شغّله أولًا','bad'); return } const d=await res.json().catch(()=>null); if(!d) return setAIStatus('استجابة غير مفهومة من الخادم','bad'); if(!d.configured) setAIStatus('الخادم يعمل لكن OPENAI_API_KEY غير مضبوط في الخادم','bad'); else setAIStatus('الخادم متصل · نموذج: '+(d.model||'غير محدد'),'ok'); return;
+  }catch(e){ setAIStatus('فشل الفحص: '+e.message,'bad') }
+}
+
+function cleanGeneratedHTML(s){ let t=String(s||'').trim(); t=t.replace(/^```(?:html)?\s*/i,'').replace(/\s*```$/,''); const idx=t.search(/<!doctype\s+html|<html\b/i); if(idx>=0) t=t.slice(idx); const end=t.toLowerCase().lastIndexOf('</html>'); if(end>-1) t=t.slice(0,end+7); return t }
+
+async function generateAIGame(){
+  const idea=$('#aiIdea').value.trim(); if(idea.length<8){ setAIStatus('اكتب وصفًا أطول للعبة','bad'); return }
+  const provider=$('#providerSelect').value; const localUrl=$('#localUrl').value.trim(); const unlimited = $('#unlimitedMode').value==='on';
+  $('#aiGenerate').disabled=true; $('#aiAbort').disabled=false; setAIStatus('جارٍ التوليد…','busy'); aiAbortController = new AbortController();
+  try{
+    if(provider==='local'){ if(!localUrl) throw new Error('عنوان LLM المحلي فارغ'); const r = await fetch(localUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ prompt: idea, type: $('#aiGameType').value, style: $('#aiStyle').value, unlimited }),signal: aiAbortController.signal}); if(!r.ok) throw new Error('خطأ من LLM المحلي: '+r.status); const data = await r.json(); const html = cleanGeneratedHTML(data.html || data.output || ''); if(!html) throw new Error('الـ LLM المحلي لم يرجع HTML صالح'); $('#aiCode').value = html; $('#aiCode').style.display='block'; localStorage.setItem('gameforge-ai-last-game', html); setAIStatus('تم التوليد محلياً ✓','ok'); showPreview(); return; }
+    const res = await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json','x-gameforge-code': $('#aiAccessCode').value||''},body:JSON.stringify({ idea, gameType: $('#aiGameType').value, style: $('#aiStyle').value, unlimited }),signal: aiAbortController.signal}); if(!res.ok){ const err = await res.json().catch(()=>({error:'خادم أعاد خطأ'})); throw new Error(err.error||JSON.stringify(err)); }
+    const reader = res.body.getReader(); const dec = new TextDecoder(); let buf=''; $('#aiCode').value=''; $('#aiCode').style.display='block';
+    while(true){ const { done, value } = await reader.read(); if(done) break; buf += dec.decode(value,{stream:true}); let lines=buf.split(/\r?\n/); buf=lines.pop()||''; for(const line of lines){ if(!line.startsWith('data:')) continue; const payload=line.replace(/^data:\s*/,'').trim(); if(!payload||payload==='[DONE]') continue; try{ const obj=JSON.parse(payload); const delta = obj.content || obj.delta || ''; if(delta){ $('#aiCode').value += delta; setAIStatus('جارٍ التوليد… ('+$('#aiCode').value.length+' حرف)','busy') } }catch(e){} } }
+    const cleaned = cleanGeneratedHTML($('#aiCode').value); $('#aiCode').value = cleaned; localStorage.setItem('gameforge-ai-last-game', cleaned); setAIStatus('تم التوليد ✓','ok'); showPreview();
+  }catch(e){ if(e.name==='AbortError') setAIStatus('تم إلغاء التوليد','bad'); else setAIStatus('فشل التوليد: '+(e.message||e),'bad'); }
+  finally{ $('#aiGenerate').disabled=false; $('#aiAbort').disabled=true; aiAbortController=null; }
+}
+
+$('#aiAbort').addEventListener('click', ()=>{ if(aiAbortController) aiAbortController.abort(); });
+function showPreview(){ const html=$('#aiCode').value.trim(); if(!html) return setAIStatus('لا يوجد كود لعرضه','bad'); $('#aiGameFrame').srcdoc=html; document.getElementById('aiGameOverlay').classList.add('open'); document.getElementById('aiGameOverlay').setAttribute('aria-hidden','false'); }
+$('#aiExitPreview').addEventListener('click', ()=>{ document.getElementById('aiGameOverlay').classList.remove('open'); document.getElementById('aiGameOverlay').setAttribute('aria-hidden','true'); $('#aiGameFrame').srcdoc=''; });
+$('#aiDownload').addEventListener('click', ()=>{ const html=$('#aiCode').value.trim(); if(!html) return setAIStatus('لا يوجد كود للتحميل','bad'); downloadFile(safeName($('#projectName').value||'game')+'-AI.html', html, 'text/html;charset=utf-8'); });
+$('#aiToggleCode').addEventListener('click', ()=>{ $('#aiCode').style.display = $('#aiCode').style.display === 'block' ? 'none' : 'block'; });
+$('#aiCheck').addEventListener('click', checkAIConnection); $('#aiGenerate').addEventListener('click', generateAIGame);
+
+$('#undoBtn').addEventListener('click', undo); $('#redoBtn').addEventListener('click', redo);
+$('#quickSave').addEventListener('click', saveLocal); $('#quickAdd').addEventListener('click', ()=>makeObject('box'));
+$('#saveLocal').addEventListener('click', saveLocal); $('#loadLocal').addEventListener('click', loadLocal); $('#exportJson').addEventListener('click', ()=>downloadFile(safeName($('#projectName').value||'project')+'.json', JSON.stringify(projectData(),null,2),'application/json')); $('#importJson').addEventListener('click', ()=>$('#jsonFile').click()); $('#jsonFile').addEventListener('change', async e=>{ const f=e.target.files[0]; if(!f) return; try{ const txt=await f.text(); restoreFromSnapshot(JSON.parse(txt)); toast('تم الاستيراد'); }catch(err){ toast('ملف غير صالح') } e.target.value=''; });
+$('#objName').addEventListener('change', ()=>{ if(!selected) return; selected.name=$('#objName').value||'Object'; refreshList(); pushSnapshot(); });
+$('#objColor').addEventListener('input', ()=>{ if(selected?.material?.color){ selected.material.color.set($('#objColor').value); pushSnapshot(); } });
+$('#objScale').addEventListener('input', ()=>{ if(!selected) return; const v=Number($('#objScale').value); selected.scale.setScalar(v); $('#objScaleV').textContent=v.toFixed(1); pushSnapshot(); });
+$('#deleteObj').addEventListener('click', ()=>removeObject(selected));
+$('#duplicate').addEventListener('click', duplicate); $('#clearScene').addEventListener('click', clearScene); $('#resetCamera').addEventListener('click', ()=>{ camera.position.set(6,5,8); controls.target.set(0,1,0); controls.update(); }); $('#camHome').addEventListener('click', ()=>{ camera.position.set(6,5,8); controls.target.set(0,1,0); controls.update(); }); $('#toggleGrid').addEventListener('click', ()=>{ $('#gridToggle').checked = !$('#gridToggle').checked; grid.visible = $('#gridToggle').checked; pushSnapshot(); }); $('#toggleRotate').addEventListener('click', ()=>{ $('#autoRotate').checked=!$('#autoRotate').checked; pushSnapshot(); toast($('#autoRotate').checked?'الدوران مفعل':'تم إيقاف الدوران') }); $('#addCharacter').addEventListener('click', createCharacter); $('#applyCharacter').addEventListener('click', ()=>{ if(!character) return toast('أنشئ شخصية'); pushSnapshot(); toast('تم تحديث الشخصية'); });
+$('#buildGame').addEventListener('click', buildGame); $('#playGame').addEventListener('click', ()=>setGame(true)); $('#stopGame').addEventListener('click', ()=>setGame(false));
+$('#toggleCharAnim')?.addEventListener('click', ()=>{});
+$('#height').addEventListener('input', ()=>{ $('#heightV').textContent = Number($('#height').value).toFixed(2); });
+$('#speed').addEventListener('input', ()=>{ $('#speedV').textContent = Number($('#speed').value).toFixed(1); });
+$$('[data-add]').forEach(btn=>btn.onclick=()=>{ const kind=btn.dataset.add||'box'; const pos=new THREE.Vector3((Math.random()-.5)*2,0.7,(Math.random()-.5)*2); makeObject(kind,pos);});
+$$('.template').forEach(b=>b.addEventListener('click', ()=>{ const t=b.dataset.template; if(!confirm('تحميل قالب '+t+'؟')) return; objects.slice().forEach(o=>disposeObject(o)); objects=[]; if(t==='arena3d') buildGame(); else if(t==='platformer'){ makeObject('box', new THREE.Vector3(0,0.6,0)); makeObject('box', new THREE.Vector3(1.3,0.8,0)); } else if(t==='runner'){ makeObject('box', new THREE.Vector3(0,0.5,0)); makeObject('sphere', new THREE.Vector3(2,0.7,0)); } else if(t==='shooter'){ makeObject('box', new THREE.Vector3(0,0.7,0)); } pushSnapshot(); refreshList(); toast('قالب '+t+' محمّل'); }));
+window.addEventListener('keydown', e=>{ if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault(); keys.add(e.key===' '?' ':e.key) });
+window.addEventListener('keyup', e=>keys.delete(e.key));
+$$('[data-key]').forEach(b=>{ const k=b.dataset.key; b.addEventListener('pointerdown', e=>{ e.preventDefault(); keys.add(k); b.setPointerCapture?.(e.pointerId) }); ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>b.addEventListener(ev, ()=>keys.delete(k))) });
+setInterval(()=>{ try{ localStorage.setItem('gameforge-pro-autosave', JSON.stringify(projectData())); }catch(_){} },10000);
+
+function animate(){ requestAnimationFrame(animate); if($('#autoRotate').checked && !gameOn){ objects.forEach(o=>{ if(o!==selected && o.userData?.kind !== 'character') o.rotation.y += 0.012; }) } if(gameOn && character){ const speed=Number($('#speed').value)*0.016; let x=0,z=0; if(keys.has('w')||keys.has('ArrowUp')) z -= 1; if(keys.has('s')||keys.has('ArrowDown')) z += 1; if(keys.has('a')||keys.has('ArrowLeft')) x -= 1; if(keys.has('d')||keys.has('ArrowRight')) x += 1; const len=Math.hypot(x,z)||1; character.position.x += (x/len)*speed*2; character.position.z += (z/len)*speed*2; if(keys.has(' ')) character.position.y = Math.min(0.55, character.position.y + 0.03); else character.position.y = Math.max(0, character.position.y - 0.03); camera.position.x += (character.position.x + 5 - camera.position.x) * 0.08; camera.position.z += (character.position.z + 7 - camera.position.z) * 0.08; camera.lookAt(character.position.x,1,character.position.z) }
+  controls.update(); renderer.render(scene,camera); }
+
+init3D(); makeObject('box', new THREE.Vector3(0,0.6,0)); makeObject('sphere', new THREE.Vector3(1.5,0.65,0)); pushSnapshot(); toast('GameForge Pro جاهز');
+})();
+</script>
+</body>
+</html>
+
