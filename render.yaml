@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: gameforge-ai-studio-pro
+    env: docker
+    plan: free
+    dockerfile_path: Dockerfile
+    region: oregon
+    build_command: null
+    start_command: null
+    env_vars:
+      - key: PROVIDER
+        value: openai
+      - key: PORT
+        value: "3000"
